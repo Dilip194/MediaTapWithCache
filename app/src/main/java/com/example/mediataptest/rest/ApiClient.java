@@ -24,6 +24,9 @@ public class ApiClient {
 
             OkHttpClient httpClient = new OkHttpClient.Builder()
                     .cache(cache)
+                    .connectTimeout(15, TimeUnit.SECONDS)
+                    .writeTimeout(15, TimeUnit.SECONDS)
+                    .readTimeout(15, TimeUnit.SECONDS)
                     .addInterceptor(chain -> {
                         try {
                             return chain.proceed(chain.request());
