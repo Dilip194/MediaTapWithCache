@@ -16,7 +16,7 @@ public class ApiClient {
 
     private static Retrofit retrofit = null;
 
-    public static Retrofit getClient(String baseUrl, Context context){
+    public static Retrofit getClient(Context context,String baseUrl){
 
         if (retrofit==null) {
             File httpCacheDirectory = new File(context.getCacheDir(), "httpCache");
