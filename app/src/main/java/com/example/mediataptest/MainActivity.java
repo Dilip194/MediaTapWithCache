@@ -1,8 +1,11 @@
 package com.example.mediataptest;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.databinding.DataBindingUtil;
+import android.net.Uri;
 import android.os.Bundle;
+import android.support.customtabs.CustomTabsIntent;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.view.MenuItemCompat;
@@ -19,6 +22,8 @@ import android.view.MenuItem;
 
 import com.example.mediataptest.constant.Constants;
 import com.example.mediataptest.mediaModel.MediaModel;
+import com.example.mediataptest.mediaModel.Page;
+import com.example.mediataptest.mediaPresenterListener.RecycleViewClickListener;
 import com.example.mediataptest.mediaPresenterListener.ServiceCompleteListener;
 import com.example.mediataptest.rest.ApiClient;
 import com.example.mediataptest.rest.ApiInterface;
@@ -28,16 +33,15 @@ import com.example.mediataptest.utils.NetworkService;
 import com.ncornette.cache.OkCacheControl;
 
 import java.util.ArrayList;
+import java.util.List;
 
-import retrofit2.Call;
-
-public class MainActivity extends AppCompatActivity implements ServiceCompleteListener, SearchView.OnQueryTextListener, SwipeRefreshLayout.OnRefreshListener,OkCacheControl.NetworkMonitor {
+public class MainActivity extends AppCompatActivity implements ServiceCompleteListener, SearchView.OnQueryTextListener, SwipeRefreshLayout.OnRefreshListener,OkCacheControl.NetworkMonitor,RecycleViewClickListener {
 
     MediaModel mediaModel = null;
     ActivityMainBinding mainBinding;
     MediaAdapter mediaAdapter;
-    RecyclerView recyclerView;
 
+    @SuppressLint("RestrictedApi")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,13 +52,20 @@ public class MainActivity extends AppCompatActivity implements ServiceCompleteLi
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
         actionBar.setHomeButtonEnabled(true);
+        actionBar.setShowHideAnimationEnabled(true);
         actionBar.setTitle("");
-
 
         new ApiService(this, MainActivity.this);
         mainBinding.includeFile.swipeLayout.setOnRefreshListener(this);
 
         initView();
+    }
+
+    private void removeProgress() {
+        if(null != mainBinding.includeFile.swipeLayout){
+            mainBinding.includeFile.swipeLayout.setRefreshing(false);
+        }
+
     }
 
     private void initView() {
@@ -71,14 +82,16 @@ public class MainActivity extends AppCompatActivity implements ServiceCompleteLi
         getMenuInflater().inflate(R.menu.menu_main, menu);
 
         MenuItem menuItem = menu.findItem(R.id.action_search);
-        SearchView searchView = (SearchView) MenuItemCompat.getActionView(menuItem);
+        SearchView searchView = (SearchView) menuItem.getActionView();
+        searchView.setQueryHint("Search");
+
         searchView.setOnQueryTextListener(this);
 
         MenuItemCompat.setOnActionExpandListener(menuItem, new MenuItemCompat.OnActionExpandListener() {
             @Override
             public boolean onMenuItemActionExpand(MenuItem item) {
-
-                return false;
+                mediaAdapter.animateTo(mediaModel);
+                return true;
             }
 
             @Override
@@ -86,7 +99,7 @@ public class MainActivity extends AppCompatActivity implements ServiceCompleteLi
                 return true;
             }
         });
-        return true;
+        return super.onCreateOptionsMenu(menu);
     }
 
     @Override
@@ -108,6 +121,7 @@ public class MainActivity extends AppCompatActivity implements ServiceCompleteLi
     @Override
     public void onTaskCompleteListener(MediaModel response) {
         this.mediaModel = response;
+        removeProgress();
         mediaAdapter.notifyChange(mediaModel);
     }
 
@@ -118,7 +132,32 @@ public class MainActivity extends AppCompatActivity implements ServiceCompleteLi
 
     @Override
     public boolean onQueryTextChange(String newText) {
-        return false;
+        if(newText.isEmpty()){
+            mediaAdapter.animateTo(mediaModel);
+        }else{
+            final MediaModel filteredModelList = filter(mediaModel, newText);
+            mediaAdapter.animateTo(filteredModelList);
+            mainBinding.includeFile.listItem.scrollToPosition(0);
+        }
+
+        return true;
+    }
+    private MediaModel filter(MediaModel models, String query) {
+
+        query = query.toLowerCase();
+        final List<Page> filteredModelList = new ArrayList<>();
+        for (Page model : models.query.pages) {
+
+            if(model != null){
+                final String name = model.getTitle().toLowerCase();
+                if (name.contains(query)) {
+                    filteredModelList.add(model);
+                }
+            }
+
+        }
+        models.query.setPages(filteredModelList);
+        return models;
     }
 
     @Override
@@ -129,5 +168,13 @@ public class MainActivity extends AppCompatActivity implements ServiceCompleteLi
     @Override
     public boolean isOnline() {
         return NetworkService.isNetworkAvailable(getApplicationContext());
+    }
+
+    @Override
+    public void onRecyclerViewClickedListener(String name) {
+        String url = "https://en.wikipedia.org/wiki/"+name;
+        CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder();
+        CustomTabsIntent customTabsIntent = builder.build();
+        customTabsIntent.launchUrl(this, Uri.parse(url));
     }
 }
