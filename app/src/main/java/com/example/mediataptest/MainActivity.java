@@ -24,12 +24,14 @@ import com.example.mediataptest.rest.ApiClient;
 import com.example.mediataptest.rest.ApiInterface;
 import com.example.mediataptest.rest.ApiService;
 import com.example.mediataptest.databinding.ActivityMainBinding;
+import com.example.mediataptest.utils.NetworkService;
+import com.ncornette.cache.OkCacheControl;
 
 import java.util.ArrayList;
 
 import retrofit2.Call;
 
-public class MainActivity extends AppCompatActivity implements ServiceCompleteListener, SearchView.OnQueryTextListener, SwipeRefreshLayout.OnRefreshListener {
+public class MainActivity extends AppCompatActivity implements ServiceCompleteListener, SearchView.OnQueryTextListener, SwipeRefreshLayout.OnRefreshListener,OkCacheControl.NetworkMonitor {
 
     MediaModel mediaModel = null;
     ActivityMainBinding mainBinding;
@@ -39,11 +41,9 @@ public class MainActivity extends AppCompatActivity implements ServiceCompleteLi
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //setContentView(R.layout.activity_main);
         mainBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        setSupportActionBar(mainBinding.toolbar);
 
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(true);
@@ -54,7 +54,10 @@ public class MainActivity extends AppCompatActivity implements ServiceCompleteLi
         new ApiService(this, MainActivity.this);
         mainBinding.includeFile.swipeLayout.setOnRefreshListener(this);
 
+        initView();
+    }
 
+    private void initView() {
         LinearLayoutManager linearLayout = new LinearLayoutManager(MainActivity.this);
         mainBinding.includeFile.listItem.setLayoutManager(linearLayout);
         mediaAdapter = new MediaAdapter(this,mediaModel);
@@ -121,5 +124,10 @@ public class MainActivity extends AppCompatActivity implements ServiceCompleteLi
     @Override
     public void onRefresh() {
         new ApiService(this, MainActivity.this);
+    }
+
+    @Override
+    public boolean isOnline() {
+        return NetworkService.isNetworkAvailable(getApplicationContext());
     }
 }

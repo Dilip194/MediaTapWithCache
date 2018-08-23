@@ -34,7 +34,7 @@ public class MediaAdapter extends RecyclerView.Adapter<MediaViewHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull MediaViewHolder holder, int position) {
-
+        holder.bindView(position);
     }
 
     @Override

@@ -19,7 +19,7 @@ class MediaViewHolder extends RecyclerView.ViewHolder {
         this.contentBinding = contentBinding;
     }
 
-    public void bindView(MediaModel mediaModel){
-
+    public void bindView(int position){
+        contentBinding.setPage(mediaModel.query.pages.get(position));
     }
 }
