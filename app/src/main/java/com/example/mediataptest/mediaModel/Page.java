@@ -1,11 +1,13 @@
 
 package com.example.mediataptest.mediaModel;
 
+import android.databinding.BaseObservable;
+
 import java.io.Serializable;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class Page implements Serializable
+public class Page extends BaseObservable implements Serializable
 {
 
     @SerializedName("pageid")

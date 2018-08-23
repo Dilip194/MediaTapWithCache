@@ -1,6 +1,8 @@
 
 package com.example.mediataptest.mediaModel;
 
+import android.databinding.BaseObservable;
+
 import java.io.Serializable;
 
 import com.google.gson.annotations.Expose;
@@ -11,7 +13,7 @@ import lombok.Setter;
 
 @Setter
 @Getter
-public class Thumbnail implements Serializable {
+public class Thumbnail extends BaseObservable implements Serializable {
 
     @SerializedName("source")
     public String source;

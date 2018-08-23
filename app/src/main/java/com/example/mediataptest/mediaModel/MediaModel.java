@@ -1,12 +1,14 @@
 
 package com.example.mediataptest.mediaModel;
 
+import android.databinding.BaseObservable;
+
 import java.io.Serializable;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class MediaModel implements Serializable {
+public class MediaModel extends BaseObservable implements Serializable {
 
     @SerializedName("batchcomplete")
     public Boolean batchcomplete;

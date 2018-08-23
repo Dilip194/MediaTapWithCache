@@ -1,6 +1,8 @@
 
 package com.example.mediataptest.mediaModel;
 
+import android.databinding.BaseObservable;
+
 import java.io.Serializable;
 import java.util.List;
 
@@ -12,7 +14,7 @@ import lombok.Setter;
 
 @Setter
 @Getter
-public class Query implements Serializable {
+public class Query extends BaseObservable implements Serializable {
 
     @SerializedName("redirects")
     public List<Redirect> redirects = null;

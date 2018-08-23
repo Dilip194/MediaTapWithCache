@@ -6,6 +6,9 @@
         <variable
             name="media"
             type="com.example.mediataptest.mediaModel.MediaModel"/>
+        <variable
+            name="page"
+            type="com.example.mediataptest.mediaModel.Page"/>
     </data>
     <android.support.v7.widget.CardView
         android:id="@+id/cardView"
@@ -37,7 +40,6 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentTop="true"
                 android:layout_toRightOf="@+id/imageView"
-                android:text="Title"
                 android:textSize="30sp" />
 
             <TextView

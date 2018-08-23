@@ -1,6 +1,8 @@
 
 package com.example.mediataptest.mediaModel;
 
+import android.databinding.BaseObservable;
+
 import java.io.Serializable;
 
 import com.google.gson.annotations.Expose;
@@ -11,7 +13,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class Continue implements Serializable {
+public class Continue extends BaseObservable implements Serializable {
 
     @SerializedName("gpsoffset")
     public Integer gpsoffset;

@@ -1,6 +1,8 @@
 
 package com.example.mediataptest.mediaModel;
 
+import android.databinding.BaseObservable;
+
 import java.io.Serializable;
 
 import com.google.gson.annotations.Expose;
@@ -11,7 +13,7 @@ import lombok.Setter;
 
 @Setter
 @Getter
-public class Redirect implements Serializable {
+public class Redirect extends BaseObservable implements Serializable {
 
     @SerializedName("index")
     public Integer index;
