@@ -17,7 +17,7 @@ public class BindingHelper {
         RequestOptions options = new RequestOptions()
                 .centerCrop()
                 .placeholder(R.mipmap.ic_launcher_round)
-                .error(R.drawable.ic_person_black_24dp);
+                .error(R.mipmap.blank_profile);
 
         Glide.with(imageView.getContext()).load(resource).apply(options).into(imageView);
     }
