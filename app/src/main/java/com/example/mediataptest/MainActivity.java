@@ -1,32 +1,24 @@
 package com.example.mediataptest;
 
 import android.annotation.SuppressLint;
-import android.content.Context;
 import android.databinding.DataBindingUtil;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.customtabs.CustomTabsIntent;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
-import android.support.v7.widget.Toolbar;
-import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.example.mediataptest.constant.Constants;
 import com.example.mediataptest.mediaModel.MediaModel;
 import com.example.mediataptest.mediaModel.Page;
 import com.example.mediataptest.mediaPresenterListener.RecycleViewClickListener;
 import com.example.mediataptest.mediaPresenterListener.ServiceCompleteListener;
-import com.example.mediataptest.rest.ApiClient;
-import com.example.mediataptest.rest.ApiInterface;
 import com.example.mediataptest.rest.ApiService;
 import com.example.mediataptest.databinding.ActivityMainBinding;
 import com.example.mediataptest.utils.NetworkService;
@@ -34,6 +26,8 @@ import com.ncornette.cache.OkCacheControl;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static android.widget.GridLayout.HORIZONTAL;
 
 public class MainActivity extends AppCompatActivity implements ServiceCompleteListener, SearchView.OnQueryTextListener, SwipeRefreshLayout.OnRefreshListener,OkCacheControl.NetworkMonitor,RecycleViewClickListener {
 
@@ -70,8 +64,10 @@ public class MainActivity extends AppCompatActivity implements ServiceCompleteLi
 
     private void initView() {
         LinearLayoutManager linearLayout = new LinearLayoutManager(MainActivity.this);
+        DividerItemDecoration itemDecor = new DividerItemDecoration(getApplicationContext(), DividerItemDecoration.VERTICAL);
+        mainBinding.includeFile.listItem.addItemDecoration(itemDecor);
         mainBinding.includeFile.listItem.setLayoutManager(linearLayout);
-        mediaAdapter = new MediaAdapter(this,mediaModel);
+        mediaAdapter = new MediaAdapter(this, mediaModel);
         mainBinding.includeFile.listItem.setAdapter(mediaAdapter);
     }
 
@@ -90,7 +86,7 @@ public class MainActivity extends AppCompatActivity implements ServiceCompleteLi
         MenuItemCompat.setOnActionExpandListener(menuItem, new MenuItemCompat.OnActionExpandListener() {
             @Override
             public boolean onMenuItemActionExpand(MenuItem item) {
-                mediaAdapter.animateTo(mediaModel);
+                mediaAdapter.animateTo(mediaModel.query.getPages());
                 return true;
             }
 
@@ -122,7 +118,7 @@ public class MainActivity extends AppCompatActivity implements ServiceCompleteLi
     public void onTaskCompleteListener(MediaModel response) {
         this.mediaModel = response;
         removeProgress();
-        mediaAdapter.notifyChange(mediaModel);
+        mediaAdapter.animateTo(mediaModel.query.getPages());
     }
 
     @Override
@@ -133,20 +129,21 @@ public class MainActivity extends AppCompatActivity implements ServiceCompleteLi
     @Override
     public boolean onQueryTextChange(String newText) {
         if(newText.isEmpty()){
-            mediaAdapter.animateTo(mediaModel);
+            mediaAdapter.animateTo(mediaModel.query.getPages());
         }else{
-            final MediaModel filteredModelList = filter(mediaModel, newText);
-            mediaAdapter.animateTo(filteredModelList);
+            List<Page> list = filter(mediaModel.query.getPages(), newText);
+            mediaAdapter.animateTo(list);
             mainBinding.includeFile.listItem.scrollToPosition(0);
         }
 
         return true;
     }
-    private MediaModel filter(MediaModel models, String query) {
 
+    private List<Page> filter(List<Page> models, String query) {
         query = query.toLowerCase();
+
         final List<Page> filteredModelList = new ArrayList<>();
-        for (Page model : models.query.pages) {
+        for (Page model : models) {
 
             if(model != null){
                 final String name = model.getTitle().toLowerCase();
@@ -156,8 +153,7 @@ public class MainActivity extends AppCompatActivity implements ServiceCompleteLi
             }
 
         }
-        models.query.setPages(filteredModelList);
-        return models;
+        return filteredModelList;
     }
 
     @Override
